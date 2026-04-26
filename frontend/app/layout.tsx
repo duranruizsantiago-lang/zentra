@@ -17,23 +17,23 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Zentra ESG — Sostenibilidad para PYMEs",
-    template: "%s | Zentra ESG",
+    default: "SENDA — Sostenibilidad para PYMEs",
+    template: "%s | SENDA",
   },
   description:
-    "Plataforma ESG-as-a-Service para PYMEs españolas. Autodiagnóstico ASG, huella de carbono, informes VSME y asistente IA.",
+    "SENDA: plataforma de sostenibilidad para PYMEs españolas. Autodiagnóstico ASG, huella de carbono, informes VSME y asistente IA.",
   keywords: ["ESG", "sostenibilidad", "PYME", "VSME", "huella carbono", "informe ESG"],
   openGraph: {
-    title: "Zentra ESG — Sostenibilidad para PYMEs",
+    title: "SENDA — Sostenibilidad para PYMEs",
     description:
-      "Plataforma ESG-as-a-Service para PYMEs españolas. Autodiagnóstico ASG, huella de carbono, informes VSME y asistente IA.",
+      "SENDA: plataforma de sostenibilidad para PYMEs españolas. Autodiagnóstico ASG, huella de carbono, informes VSME y asistente IA.",
     type: "website",
     locale: "es_ES",
-    siteName: "Zentra ESG",
+    siteName: "SENDA",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zentra ESG — Sostenibilidad para PYMEs",
+    title: "SENDA — Sostenibilidad para PYMEs",
     description:
       "Plataforma ESG-as-a-Service para PYMEs españolas.",
   },

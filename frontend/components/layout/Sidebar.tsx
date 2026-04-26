@@ -68,7 +68,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   transition={{ duration: 0.15 }}
                   className="font-bold text-lg text-sidebar-foreground whitespace-nowrap overflow-hidden"
                 >
-                  Zentra ESG
+                  SENDA
                 </motion.span>
               )}
             </AnimatePresence>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, lazy, Suspense } from "react";
 import {
   BarChart3,
   TreePine,
@@ -11,13 +11,16 @@ import {
 } from "lucide-react";
 import { useMyBenchmark } from "@/hooks/useBenchmarks";
 import { MetricCard } from "@/components/benchmarks/MetricCard";
-import { BenchmarkRadar } from "@/components/benchmarks/BenchmarkRadar";
 import { SectorComparisonTable } from "@/components/benchmarks/SectorComparisonTable";
 import type { ComparisonRow } from "@/components/benchmarks/SectorComparisonTable";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { toast } from "sonner";
+
+const BenchmarkRadar = lazy(() =>
+  import("@/components/benchmarks/BenchmarkRadar").then((m) => ({ default: m.BenchmarkRadar }))
+);
 
 function interpretScore(pct: number, metric: string): string {
   if (pct >= 75) return `Tu ${metric} está significativamente por encima del promedio sectorial.`;
@@ -259,7 +262,9 @@ export function BenchmarkContent() {
       </div>
 
       {/* Radar chart */}
-      <BenchmarkRadar data={radarData} />
+      <Suspense fallback={<Skeleton className="h-80 w-full rounded-md" />}>
+        <BenchmarkRadar data={radarData} />
+      </Suspense>
 
       {/* Detailed table */}
       <SectorComparisonTable rows={tableRows} />

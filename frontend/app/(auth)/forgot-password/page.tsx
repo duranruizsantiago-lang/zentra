@@ -23,8 +23,12 @@ export default function ForgotPasswordPage() {
   });
 
   const onSubmit = async (data: FormData) => {
-    await new Promise((r) => setTimeout(r, 800));
-    console.log("Reset password for:", data.email);
+    try {
+      const { default: api } = await import("@/lib/api");
+      await api.post("/api/v1/auth/forgot-password", { email: data.email });
+    } catch {
+      // Always show success for security (don't leak whether email exists)
+    }
     setSent(true);
   };
 

@@ -32,13 +32,22 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      // TODO: connect to real API
-      await new Promise((r) => setTimeout(r, 1000));
-      console.log("Login:", data);
+      const { default: api } = await import("@/lib/api");
+      const res = await api.post("/api/v1/auth/login", {
+        username: data.email,
+        password: data.password,
+      });
+      localStorage.setItem("access_token", res.data.access_token);
+      localStorage.setItem("refresh_token", res.data.refresh_token);
       toast.success("Sesión iniciada correctamente");
       router.push("/");
-    } catch {
-      toast.error("Credenciales incorrectas. Inténtalo de nuevo.");
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 401) {
+        toast.error("Credenciales incorrectas. Inténtalo de nuevo.");
+      } else {
+        toast.error("Error de conexión con el servidor. Verifica que el backend está ejecutándose.");
+      }
     }
   };
 

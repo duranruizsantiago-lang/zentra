@@ -1,14 +1,39 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { TreePine, TrendingDown, Star, FileUp } from "lucide-react";
 import { KpiCard } from "@/components/dashboard/KpiCards";
-import { EmissionsChart } from "@/components/dashboard/EmissionsChart";
-import { EmissionsBreakdown } from "@/components/dashboard/EmissionsBreakdown";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChartCard } from "@/components/shared/ChartCard";
+
+const EmissionsChart = dynamic(
+  () => import("@/components/dashboard/EmissionsChart").then((m) => ({ default: m.EmissionsChart })),
+  {
+    ssr: false,
+    loading: () => (
+      <ChartCard title="Evolución de Emisiones" description="Últimos 12 meses — tCO₂e">
+        <Skeleton className="h-[280px] w-full rounded-md" />
+      </ChartCard>
+    ),
+  }
+);
+
+const EmissionsBreakdown = dynamic(
+  () => import("@/components/dashboard/EmissionsBreakdown").then((m) => ({ default: m.EmissionsBreakdown })),
+  {
+    ssr: false,
+    loading: () => (
+      <ChartCard title="Distribución por Alcance" description="Cargando…">
+        <Skeleton className="h-[280px] w-full rounded-md" />
+      </ChartCard>
+    ),
+  }
+);
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Panel principal de Zentra ESG. Visualiza tus emisiones, score ASG y accede a todas las herramientas de sostenibilidad.",
+  description: "Panel principal de SENDA. Visualiza tus emisiones, score ASG y accede a todas las herramientas de sostenibilidad.",
 };
 
 export default function DashboardPage() {

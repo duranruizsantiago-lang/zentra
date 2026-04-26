@@ -54,12 +54,25 @@ export default function RegisterPage() {
     if (!step1Data) return;
     setIsSubmitting(true);
     try {
-      await new Promise((r) => setTimeout(r, 1200));
-      console.log("Register:", { ...step1Data, ...data });
-      toast.success("Cuenta creada correctamente. ¡Bienvenido!");
+      const { default: api } = await import("@/lib/api");
+      await api.post("/api/v1/auth/register", {
+        email: step1Data.email,
+        password: step1Data.password,
+        full_name: step1Data.full_name,
+        company_name: data.company_name,
+        company_sector: data.company_sector,
+        company_size: data.company_size,
+        nif: data.nif,
+      });
+      toast.success("Cuenta creada correctamente. ¡Bienvenido a SENDA!");
       router.push("/");
-    } catch {
-      toast.error("Error al crear la cuenta. Inténtalo de nuevo.");
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      if (detail) {
+        toast.error(detail);
+      } else {
+        toast.error("Error de conexión con el servidor. Verifica que el backend está ejecutándose.");
+      }
     } finally {
       setIsSubmitting(false);
     }

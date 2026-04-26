@@ -39,7 +39,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const title = pageTitles[pathname] ?? "Zentra ESG";
+  const title = pageTitles[pathname] ?? "SENDA";
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
@@ -57,7 +57,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Leaf className="h-4 w-4" />
               </div>
-              <span className="font-bold text-lg">Zentra ESG</span>
+              <span className="font-bold text-lg">SENDA</span>
             </Link>
           </div>
           <nav className="py-4 px-2 space-y-1">
