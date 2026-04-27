@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   LayoutDashboard,
   ClipboardCheck,
@@ -45,12 +45,13 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const prefersReduced = useReducedMotion();
 
   return (
     <TooltipProvider delay={0}>
       <motion.aside
-        animate={{ width: collapsed ? 80 : 240 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
+        animate={prefersReduced ? undefined : { width: collapsed ? 80 : 240 }}
+        transition={prefersReduced ? { duration: 0 } : { duration: 0.2, ease: "easeOut" }}
         className="hidden lg:flex flex-col h-full bg-sidebar border-r border-sidebar-border shrink-0 overflow-hidden"
       >
         {/* Logo */}
@@ -59,19 +60,27 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Leaf className="h-4 w-4" />
             </div>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="font-bold text-lg text-sidebar-foreground whitespace-nowrap overflow-hidden"
-                >
+            {prefersReduced ? (
+              !collapsed && (
+                <span className="font-bold text-lg text-sidebar-foreground whitespace-nowrap overflow-hidden">
                   SENDA
-                </motion.span>
-              )}
-            </AnimatePresence>
+                </span>
+              )
+            ) : (
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="font-bold text-lg text-sidebar-foreground whitespace-nowrap overflow-hidden"
+                  >
+                    SENDA
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            )}
           </Link>
         </div>
 
@@ -93,19 +102,27 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                <AnimatePresence>
-                  {!collapsed && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.1 }}
-                      className="whitespace-nowrap overflow-hidden flex-1"
-                    >
+                {prefersReduced ? (
+                  !collapsed && (
+                    <span className="whitespace-nowrap overflow-hidden flex-1">
                       {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                    </span>
+                  )
+                ) : (
+                  <AnimatePresence>
+                    {!collapsed && (
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.1 }}
+                        className="whitespace-nowrap overflow-hidden flex-1"
+                      >
+                        {item.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                )}
                 {!collapsed && item.badge && item.badge > 0 && (
                   <Badge
                     variant="destructive"
