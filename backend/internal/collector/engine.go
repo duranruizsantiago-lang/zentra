@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/duranruizsantiago-lang/zentra/internal/connectors"
 	"github.com/duranruizsantiago-lang/zentra/internal/models"
 	"github.com/duranruizsantiago-lang/zentra/internal/store"
@@ -63,8 +64,15 @@ func (e *Engine) RunScan(ctx context.Context, connectorID string, orgID string) 
 		return nil, fmt.Errorf("unsupported connector type: %s", cType)
 	}
 
+	// Parse connector UUID for evidence storage
+	connUUID, err := uuid.Parse(connectorID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid connector ID: %w", err)
+	}
+
 	// Store evidence
 	for i := range evidence {
+		evidence[i].ConnectorID = connUUID
 		rawJSON, _ := json.Marshal(map[string]interface{}{
 			"connector_id": connectorID,
 			"collected_at": time.Now().UTC().Format(time.RFC3339),
@@ -82,7 +90,7 @@ func (e *Engine) RunScan(ctx context.Context, connectorID string, orgID string) 
 	e.store.Pool.Exec(ctx, "UPDATE connectors SET last_scan_at = $1, status = 'connected' WHERE id = $2", time.Now(), connectorID)
 
 	return &models.ScanResult{
-		ConnectorID: connectorID,
+		ConnectorID: connUUID,
 		StartedAt:   startedAt,
 		CompletedAt: time.Now(),
 		Evidence:    evidence,
