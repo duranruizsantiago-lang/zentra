@@ -5,48 +5,34 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatNumber(value: number, decimals = 1): string {
-  return new Intl.NumberFormat("es-ES", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  }).format(value);
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+export async function apiFetch(path: string, options?: RequestInit) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options?.headers as Record<string, string>),
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Request failed" }));
+    throw new Error(err.error || "Request failed");
+  }
+  return res.json();
 }
 
-export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
+export function formatScore(score: number): string {
+  return `${Math.round(score)}%`;
 }
 
-export function formatDate(date: string | Date): string {
-  return new Intl.DateTimeFormat("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(date));
-}
-
-export function formatRelativeDate(date: string | Date): string {
-  const rtf = new Intl.RelativeTimeFormat("es-ES", { numeric: "auto" });
-  const diff = (new Date(date).getTime() - Date.now()) / 1000;
-  if (Math.abs(diff) < 60) return rtf.format(Math.round(diff), "second");
-  if (Math.abs(diff) < 3600) return rtf.format(Math.round(diff / 60), "minute");
-  if (Math.abs(diff) < 86400) return rtf.format(Math.round(diff / 3600), "hour");
-  return rtf.format(Math.round(diff / 86400), "day");
-}
-
-export function formatEmissions(value: number): string {
-  if (value >= 1000) return `${formatNumber(value / 1000, 2)} ktCO₂e`;
-  return `${formatNumber(value)} tCO₂e`;
-}
-
-export function formatPercentChange(value: number): string {
-  const sign = value >= 0 ? "+" : "";
-  return `${sign}${formatNumber(value)}%`;
-}
-
-export function truncate(str: string, length: number): string {
-  if (str.length <= length) return str;
-  return `${str.slice(0, length)}…`;
+export function statusColor(status: string): string {
+  switch (status) {
+    case "pass": return "bg-green-500/20 text-green-400 border-green-500/30";
+    case "fail": return "bg-red-500/20 text-red-400 border-red-500/30";
+    case "warn": return "bg-amber-500/20 text-amber-400 border-amber-500/30";
+    case "manual": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    default: return "bg-zinc-500/20 text-zinc-400 border-zinc-500/30";
+  }
 }

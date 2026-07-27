@@ -1,7 +1,46 @@
+# Dependencies
+node_modules/
+.pnp/
+
+# Build
+.next/
+out/
+dist/
+build/
+
+# Go
+backend/vendor/
+*.exe
+
+# Python
 __pycache__/
 *.pyc
+.reporter-venv/
+
+# Env
 .env
-.pytest_cache/
-*.egg-info/
-venv/
-.venv/
+.env.local
+.env*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate*
+infra/*.tfvars
+
+# Test
+frontend/playwright-report/
+frontend/test-results/
+coverage/
+
+# Docker
+*.log

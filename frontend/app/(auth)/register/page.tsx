@@ -1,212 +1,100 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Loader2, Check } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-
-const steps = ["Datos personales", "Datos empresa"] as const;
-
-const step1Schema = z.object({
-  full_name: z.string().min(2, "Nombre requerido"),
-  email: z.string().email("Email inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
-});
-
-const step2Schema = z.object({
-  company_name: z.string().min(2, "Nombre de empresa requerido"),
-  nif: z.string().min(9, "NIF inválido").max(9),
-  company_sector: z.string().min(1, "Selecciona un sector"),
-  company_size: z.enum(["micro", "small", "medium"]),
-});
-
-type Step1Form = z.infer<typeof step1Schema>;
-type Step2Form = z.infer<typeof step2Schema>;
+import Link from "next/link";
+import { apiFetch } from "@/lib/utils";
 
 export default function RegisterPage() {
+  const [orgName, setOrgName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const [step, setStep] = useState(0);
-  const [step1Data, setStep1Data] = useState<Step1Form | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form1 = useForm<Step1Form>({ resolver: zodResolver(step1Schema) });
-  const form2 = useForm<Step2Form>({
-    resolver: zodResolver(step2Schema),
-    defaultValues: { company_size: "small" },
-  });
-
-  const handleStep1 = (data: Step1Form) => {
-    setStep1Data(data);
-    setStep(1);
-  };
-
-  const handleStep2 = async (data: Step2Form) => {
-    if (!step1Data) return;
-    setIsSubmitting(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
-      const { default: api } = await import("@/lib/api");
-      await api.post("/api/v1/auth/register", {
-        email: step1Data.email,
-        password: step1Data.password,
-        full_name: step1Data.full_name,
-        company_name: data.company_name,
-        company_sector: data.company_sector,
-        company_size: data.company_size,
-        nif: data.nif,
+      const data = await apiFetch("/api/v1/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ organization_name: orgName, email, password }),
       });
-      toast.success("Cuenta creada correctamente. ¡Bienvenido a SENDA!");
-      router.push("/");
-    } catch (err: unknown) {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      if (detail) {
-        toast.error(detail);
-      } else {
-        toast.error("Error de conexión con el servidor. Verifica que el backend está ejecutándose.");
-      }
+      localStorage.setItem("token", data.token);
+      router.push("/overview");
+    } catch (err: any) {
+      setError(err.message);
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Crear cuenta</CardTitle>
-        <CardDescription>Gratis, sin tarjeta de crédito</CardDescription>
-
-        {/* Step indicator */}
-        <div className="flex items-center justify-center gap-2 mt-4">
-          {steps.map((label, i) => (
-            <div key={label} className="flex items-center gap-2">
-              <div
-                className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-colors",
-                  i < step
-                    ? "bg-primary text-primary-foreground"
-                    : i === step
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                )}
-              >
-                {i < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
-              </div>
-              <span className={cn("text-xs", i === step ? "font-medium" : "text-muted-foreground")}>
-                {label}
-              </span>
-              {i < steps.length - 1 && <div className="h-px w-6 bg-border" />}
-            </div>
-          ))}
+    <div className="min-h-screen flex items-center justify-center p-8">
+      <div className="glass p-8 w-full max-w-md space-y-6 animate-slide-up">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold text-white">Crear Cuenta</h1>
+          <p className="text-zinc-400">Empieza con CertFlow gratis</p>
         </div>
-      </CardHeader>
 
-      <CardContent>
-        {step === 0 && (
-          <form onSubmit={form1.handleSubmit(handleStep1)} className="space-y-4" noValidate>
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Nombre completo</Label>
-              <Input id="full_name" placeholder="María García" aria-describedby={form1.formState.errors.full_name ? "full_name-error" : undefined} className={form1.formState.errors.full_name ? "border-destructive" : ""} {...form1.register("full_name")} />
-              {form1.formState.errors.full_name && (
-                <p id="full_name-error" className="text-xs text-destructive">{form1.formState.errors.full_name.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="tu@empresa.es" autoComplete="email" aria-describedby={form1.formState.errors.email ? "reg-email-error" : undefined} className={form1.formState.errors.email ? "border-destructive" : ""} {...form1.register("email")} />
-              {form1.formState.errors.email && (
-                <p id="reg-email-error" className="text-xs text-destructive">{form1.formState.errors.email.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" placeholder="Mínimo 8 caracteres" autoComplete="new-password" aria-describedby={form1.formState.errors.password ? "reg-password-error" : undefined} className={form1.formState.errors.password ? "border-destructive" : ""} {...form1.register("password")} />
-              {form1.formState.errors.password && (
-                <p id="reg-password-error" className="text-xs text-destructive">{form1.formState.errors.password.message}</p>
-              )}
-            </div>
-            <Button type="submit" className="w-full">Continuar</Button>
-          </form>
+        {error && (
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            {error}
+          </div>
         )}
 
-        {step === 1 && (
-          <form onSubmit={form2.handleSubmit(handleStep2)} className="space-y-4" noValidate>
-            <div className="space-y-2">
-              <Label htmlFor="company_name">Nombre de empresa</Label>
-              <Input id="company_name" placeholder="Mi Empresa S.L." {...form2.register("company_name")} />
-              {form2.formState.errors.company_name && (
-                <p className="text-xs text-destructive">{form2.formState.errors.company_name.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="nif">NIF / CIF</Label>
-              <Input id="nif" placeholder="B12345678" {...form2.register("nif")} />
-              {form2.formState.errors.nif && (
-                <p className="text-xs text-destructive">{form2.formState.errors.nif.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label>Sector</Label>
-              <Select onValueChange={(v) => form2.setValue("company_sector", String(v))}>
-                <SelectTrigger aria-label="Selecciona un sector">
-                  <SelectValue placeholder="Selecciona un sector" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="retail">Comercio y Retail</SelectItem>
-                  <SelectItem value="manufacturing">Manufactura</SelectItem>
-                  <SelectItem value="services">Servicios profesionales</SelectItem>
-                  <SelectItem value="construction">Construcción</SelectItem>
-                  <SelectItem value="hospitality">Hostelería y Turismo</SelectItem>
-                  <SelectItem value="transport">Transporte y Logística</SelectItem>
-                  <SelectItem value="technology">Tecnología</SelectItem>
-                  <SelectItem value="agriculture">Agricultura</SelectItem>
-                  <SelectItem value="other">Otro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Tamaño de empresa</Label>
-              <Select
-                defaultValue="small"
-                onValueChange={(v) => form2.setValue("company_size", String(v) as "micro" | "small" | "medium")}
-              >
-                <SelectTrigger aria-label="Selecciona tamaño de empresa">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="micro">Microempresa ({"<"}10 empleados)</SelectItem>
-                  <SelectItem value="small">Pequeña (10–49 empleados)</SelectItem>
-                  <SelectItem value="medium">Mediana (50–249 empleados)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-3">
-              <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(0)}>
-                Atrás
-              </Button>
-              <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
-              </Button>
-            </div>
-          </form>
-        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">Nombre de la Organizacion</label>
+            <input
+              type="text"
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-accent-400 transition-colors"
+              placeholder="Mi Empresa S.L."
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-accent-400 transition-colors"
+              placeholder="tu@empresa.com"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1.5">Contrasena</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-accent-400 transition-colors"
+              placeholder="Minimo 8 caracteres"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-accent-500 hover:bg-accent-400 text-white rounded-xl font-medium transition-all disabled:opacity-50"
+          >
+            {loading ? "Creando cuenta..." : "Crear Cuenta"}
+          </button>
+        </form>
 
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          ¿Ya tienes cuenta?{" "}
-          <Link href="/login" className="text-primary font-medium hover:underline">
-            Inicia sesión
+        <p className="text-center text-sm text-zinc-500">
+          Ya tienes cuenta?{" "}
+          <Link href="/login" className="text-accent-400 hover:text-accent-300">
+            Iniciar sesion
           </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </p>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,12 @@
+[project]
+name = "certflow-reporter"
+version = "1.0.0"
+description = "PDF report generation engine for CertFlow"
+requires-python = ">=3.11"
+dependencies = [
+    "jinja2>=3.1",
+    "weasyprint>=62",
+]
+
+[project.scripts]
+certflow-report = "reporter.cli:main"

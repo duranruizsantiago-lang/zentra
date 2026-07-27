@@ -1,32 +1,19 @@
-services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    env_file: .env
-    environment:
-      - PYTHONUNBUFFERED=1
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    volumes:
-      - ./app:/app/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+version: "3.9"
 
-  postgres:
+services:
+  db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: vendia
-      POSTGRES_PASSWORD: vendia_dev
-      POSTGRES_DB: vendia
+      POSTGRES_USER: zentra
+      POSTGRES_PASSWORD: zentra
+      POSTGRES_DB: zentra
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./backend/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vendia -d vendia"]
+      test: ["CMD-SHELL", "pg_isready -U zentra"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -35,6 +22,37 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.api
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://zentra:zentra@db:5432/zentra?sslmode=disable
+      JWT_SECRET: certflow-dev-secret-change-in-production
+      PORT: "8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    depends_on:
+      - api
 
 volumes:
   pgdata:

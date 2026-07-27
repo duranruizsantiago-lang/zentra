@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CertFlow Compliance Report — {{ framework }}</title>
+  <style>
+    @page { size: A4; margin: 2cm; @bottom-center { content: "CertFlow — Pagina " counter(page) " de " counter(pages); font-size: 9px; color: #999; } }
+    body { font-family: system-ui, -apple-system, sans-serif; font-size: 11pt; color: #1a1a2e; line-height: 1.6; }
+    h1 { color: #3b82f6; font-size: 24pt; margin-bottom: 0.2cm; }
+    .subtitle { color: #6b7280; font-size: 12pt; margin-bottom: 1cm; }
+    .meta { background: #f8fafc; padding: 1cm; border-radius: 8px; margin-bottom: 0.8cm; }
+    .meta table { width: 100%; border-collapse: collapse; }
+    .meta td { padding: 4px 0; }
+    .meta td:first-child { font-weight: 600; width: 4cm; color: #475569; }
+    .score-box { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 0.8cm; border-radius: 12px; text-align: center; margin-bottom: 0.8cm; }
+    .score-box .number { font-size: 36pt; font-weight: 800; }
+    .score-box .label { font-size: 10pt; opacity: 0.8; }
+    h2 { color: #1e293b; font-size: 16pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-top: 0.8cm; }
+    .evidence { margin-bottom: 0.5cm; }
+    .evidence-item { padding: 0.4cm; border-left: 4px solid #e2e8f0; margin-bottom: 0.3cm; background: #f8fafc; }
+    .evidence-item.pass { border-left-color: #22c55e; }
+    .evidence-item.fail { border-left-color: #ef4444; }
+    .evidence-item.warn { border-left-color: #f59e0b; }
+    .evidence-item .status { font-size: 9pt; font-weight: 700; text-transform: uppercase; }
+    .pass .status { color: #16a34a; }
+    .fail .status { color: #dc2626; }
+    .warn .status { color: #d97706; }
+    .evidence-item .finding { margin-top: 4px; }
+    .evidence-item .resource { font-size: 9pt; color: #6b7280; font-family: monospace; }
+    footer { margin-top: 1cm; font-size: 9pt; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 0.5cm; }
+  </style>
+</head>
+<body>
+  <h1>CertFlow Compliance Report</h1>
+  <div class="subtitle">{{ framework }} — Compliance Assessment</div>
+
+  <div class="meta">
+    <table>
+      <tr><td>Organizacion</td><td>{{ organization }}</td></tr>
+      <tr><td>Framework</td><td>{{ framework }}</td></tr>
+      <tr><td>Fecha</td><td>{{ date }}</td></tr>
+      <tr><td>Evidencias recolectadas</td><td>{{ total_evidence }}</td></tr>
+    </table>
+  </div>
+
+  <div class="score-box">
+    <div class="number">{{ score }}%</div>
+    <div class="label">Compliance Score — {{ framework }}</div>
+  </div>
+
+  <h2>Resumen de Hallazgos</h2>
+  <div class="meta">
+    <table>
+      <tr><td>✅ Pass</td><td>{{ pass_count }}</td></tr>
+      <tr><td>❌ Fail</td><td>{{ fail_count }}</td></tr>
+      <tr><td>⚠️ Warn</td><td>{{ warn_count }}</td></tr>
+      <tr><td>🔵 Manual</td><td>{{ manual_count }}</td></tr>
+    </table>
+  </div>
+
+  <h2>Evidencias Detalladas</h2>
+  <div class="evidence">
+    {% for e in evidence %}
+    <div class="evidence-item {{ e.status }}">
+      <div class="status">{{ e.status.upper() }}</div>
+      <div class="finding">{{ e.finding }}</div>
+      <div class="resource">{{ e.resource }} — Ctrl: {{ e.control_id }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <footer>
+    Generado por CertFlow — Compliance Automation Platform<br>
+    Este informe es confidencial y para uso exclusivo de {{ organization }}.
+  </footer>
+</body>
+</html>
