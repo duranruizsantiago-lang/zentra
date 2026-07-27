@@ -20,8 +20,8 @@ Full-stack platform that connects to your cloud providers (GCP, AWS, Azure), sca
 
 ```bash
 # 1. Clone & start
-git clone https://github.com/duranruizsantiago-lang/zentra.git
-cd zentra
+git clone https://github.com/duranruizsantiago-lang/certflow.git
+cd certflow
 docker compose up --build
 
 # 2. Seed demo data (opens another terminal)
@@ -90,8 +90,8 @@ The seed script populates the platform with simulated GCP & AWS scans. You'll se
 ### Docker (recommended)
 
 ```bash
-git clone https://github.com/duranruizsantiago-lang/zentra.git
-cd zentra
+git clone https://github.com/duranruizsantiago-lang/certflow.git
+cd certflow
 cp .env.example .env
 docker compose up --build
 ```
@@ -127,7 +127,7 @@ npm install && npm run dev
 ## 📁 Project Structure
 
 ```
-zentra/
+certflow/
 ├── backend/                    # Go API (Chi router)
 │   ├── cmd/server/main.go     # Entrypoint
 │   ├── internal/
