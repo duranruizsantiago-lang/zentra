@@ -44,3 +44,4 @@ coverage/
 
 # Docker
 *.log
+backend/server

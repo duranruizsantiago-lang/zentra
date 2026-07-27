@@ -27,8 +27,7 @@ func main() {
 		port = "8080"
 	}
 
-	fmt.Printf("CertFlow API running on :%s
-", port)
+	fmt.Printf("CertFlow API running on :%s\n", port)
 	if err := http.ListenAndServe(":"+port, server.Handler()); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
