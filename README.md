@@ -1,20 +1,52 @@
 # 🛡️ CertFlow — Compliance Automation Platform
 
-**Automatiza la recolección de evidencias de compliance para NIS2, DORA, ISO 27001 y ENS.**
+<p align="center">
+  <img src="https://img.shields.io/badge/Go-1.23-00ADD8?logo=go" alt="Go">
+  <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js">
+  <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" alt="TS">
+  <img src="https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Terraform-GCP-844FBA?logo=terraform" alt="Terraform">
+  <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker" alt="Docker">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+</p>
 
-Plataforma full-stack que conecta tus proveedores cloud (GCP, AWS, Azure), escanea automáticamente tus recursos, mapea hallazgos a controles de compliance y genera informes PDF listos para auditoría. Diseñado para PYMEs españolas que necesitan cumplir con NIS2 y DORA sin un equipo de compliance dedicado.
+**Automated compliance evidence collection for NIS2, DORA, ISO 27001 & ENS.**
+
+Full-stack platform that connects to your cloud providers (GCP, AWS, Azure), scans your infrastructure, maps findings to compliance controls, and generates audit-ready PDF reports. Built for Spanish SMEs facing NIS2/DORA deadlines.
+
+---
+
+## 👀 Try It In 2 Minutes
+
+```bash
+# 1. Clone & start
+git clone https://github.com/duranruizsantiago-lang/zentra.git
+cd zentra
+docker compose up --build
+
+# 2. Seed demo data (opens another terminal)
+./scripts/demo-seed.sh
+
+# 3. Open browser
+open http://localhost:3000/login
+# Email: demo@certflow.io
+# Password: Demo1234!
+```
+
+The seed script populates the platform with simulated GCP & AWS scans. You'll see a live compliance dashboard with evidence across NIS2, DORA, ISO 27001, and ENS frameworks.
 
 ---
 
 ## ✨ Features
 
-- **Multi-Cloud Connectors** — Conecta GCP, AWS y Azure. Escaneo automatizado de IAM, storage, networking, logging y KMS.
-- **Framework Mapping** — Controles pre-cargados para NIS2, DORA, ISO 27001 y ENS (Esquema Nacional de Seguridad).
-- **Compliance Dashboard** — Radar de compliance por framework, KPIs, barras de progreso y timeline de evidencias.
-- **Evidence Collection** — Recolección automática de evidencias con estado pass/fail/warn/manual.
-- **PDF Report Generation** — Informes profesionales con puntuaciones, hallazgos detallados y formato listo para auditoría.
-- **Multi-Tenant** — RBAC con roles admin/member/auditor por organización.
-- **Dark Mode Premium** — Interfaz glassmorphism diseñada con principios de UI/UX profesional.
+- **Multi-Cloud Connectors** — GCP, AWS, Azure. Automated scanning of IAM, storage, networking, KMS, and audit logging.
+- **Framework Mapping** — Pre-loaded controls for NIS2 (8), DORA (5), ISO 27001 (5), and ENS (3). Extensible.
+- **Compliance Dashboard** — Framework scores, KPI cards, progress bars, pass/fail/warn breakdowns.
+- **Evidence Collection** — Automatic evidence collection with pass/fail/warn/manual status.
+- **PDF Reports** — Professional audit reports with scores and detailed findings via Jinja2 + WeasyPrint.
+- **Multi-Tenant RBAC** — Organizations with admin, member, and auditor roles.
+- **Premium UI** — Dark mode with glassmorphism, responsive sidebar, polished UX.
+- **CI/CD + Security** — GitHub Actions with Trivy vulnerability scanning and Gitleaks secret detection.
 
 ---
 
@@ -40,7 +72,7 @@ Plataforma full-stack que conecta tus proveedores cloud (GCP, AWS, Azure), escan
 │  │  Audit Logs      │ │  IAM Policies     │ │  Defender        │  │
 │  └──────────────────┘ └──────────────────┘ └──────────────────┘  │
 │                                                                  │
-│  Frameworks: NIS2 · DORA · ISO 27001 · ENS · CCN-STIC           │
+│  Frameworks: NIS2 · DORA · ISO 27001 · ENS                       │
 │  Infra: GCP Cloud Run · Cloud SQL · Artifact Registry           │
 │  IaC: Terraform · CI/CD: GitHub Actions + Security Gates        │
 └──────────────────────────────────────────────────────────────────┘
@@ -48,41 +80,46 @@ Plataforma full-stack que conecta tus proveedores cloud (GCP, AWS, Azure), escan
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Development)
 
 ### Prerequisites
 
-- Go 1.23+
-- Node.js 23+
-- Docker & Docker Compose
-- Python 3.11+ (for reporter)
+- Docker & Docker Compose (easiest)
+- Or: Go 1.23+, Node.js 23+, Python 3.11+
 
-### Development
+### Docker (recommended)
 
 ```bash
-# Clone
 git clone https://github.com/duranruizsantiago-lang/zentra.git
 cd zentra
-
-# Start infra (PostgreSQL + Redis)
-docker compose up -d db redis
-
-# Start API
-cd backend
-go run ./cmd/server
-
-# Start frontend (new terminal)
-cd frontend
-npm install
-npm run dev
+cp .env.example .env
+docker compose up --build
 ```
 
 Open http://localhost:3000
 
-### One-command (full stack)
+### Seed Demo Data
 
 ```bash
-docker compose up --build
+./scripts/demo-seed.sh
+```
+
+This creates an organization, adds GCP + AWS connectors, runs scans, and populates evidence.
+
+### Without Docker
+
+```bash
+# Terminal 1 — Database
+docker compose up -d db redis
+
+# Terminal 2 — API
+cd backend
+cp ../.env.example ../.env
+go run ./cmd/server
+
+# Terminal 3 — Frontend
+cd frontend
+npm install && npm run dev
 ```
 
 ---
@@ -100,19 +137,22 @@ zentra/
 │   │   ├── connectors/        # GCP, AWS, Azure clients
 │   │   ├── models/            # Domain types
 │   │   └── store/             # PostgreSQL data layer
-│   └── migrations/            # SQL schema + seed data
-├── frontend/                   # Next.js 15 + TypeScript
+│   └── migrations/            # SQL schema + 21 seeded controls
+├── frontend/                   # Next.js 15 App Router
 │   └── app/
 │       ├── (auth)/            # Login, Register
-│       └── (dashboard)/       # Overview, Controls, Evidence, Connectors, Reports, Settings
+│       └── (dashboard)/       # Overview, Controls, Evidence,
+│                              # Connectors, Reports, Settings
 ├── reporter/                   # Python PDF report engine
-│   ├── cli.py                 # CLI entrypoint
-│   └── templates/             # Jinja2 HTML → PDF templates
+│   ├── cli.py
+│   └── templates/             # Jinja2 → PDF
 ├── infra/                      # Terraform (GCP)
-│   ├── main.tf                # Cloud Run, Cloud SQL, Artifact Registry, IAM
+│   ├── main.tf                # Cloud Run, Cloud SQL, IAM
 │   └── variables.tf
-├── .github/workflows/ci.yml   # CI/CD + security scanning
-├── docker-compose.yml         # Dev environment
+├── scripts/demo-seed.sh       # Demo data seeder
+├── .github/workflows/ci.yml   # CI/CD + Trivy + Gitleaks
+├── .env.example               # Environment variables
+├── docker-compose.yml         # Full dev stack
 ├── Dockerfile.api
 └── Dockerfile.frontend
 ```
@@ -123,19 +163,18 @@ zentra/
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `GET` | `/health` | No | Health check |
-| `POST` | `/api/v1/auth/register` | No | Register org + admin user |
-| `POST` | `/api/v1/auth/login` | No | Login, returns JWT |
-| `GET` | `/api/v1/dashboard` | JWT | Compliance dashboard data |
-| `GET` | `/api/v1/scores` | JWT | Compliance scores by framework |
-| `GET` | `/api/v1/controls?framework=NIS2` | JWT | List controls (filterable) |
-| `GET` | `/api/v1/controls/:id/evidence` | JWT | Evidence for a control |
+| `GET` | `/health` | — | Health check |
+| `POST` | `/api/v1/auth/register` | — | Register org + admin |
+| `POST` | `/api/v1/auth/login` | — | Login → JWT + refresh |
+| `GET` | `/api/v1/dashboard` | JWT | Compliance overview |
+| `GET` | `/api/v1/scores` | JWT | Scores by framework |
+| `GET` | `/api/v1/controls` | JWT | Controls (filter: `?framework=NIS2`) |
 | `GET` | `/api/v1/connectors` | JWT | List cloud connectors |
-| `POST` | `/api/v1/connectors` | JWT | Add cloud connector |
+| `POST` | `/api/v1/connectors` | JWT | Add connector |
+| `POST` | `/api/v1/connectors/:id/scan` | JWT | Trigger scan |
 | `DELETE` | `/api/v1/connectors/:id` | JWT | Remove connector |
-| `POST` | `/api/v1/connectors/:id/scan` | JWT | Trigger compliance scan |
-| `GET` | `/api/v1/evidence` | JWT | List evidence (last 50) |
-| `GET` | `/api/v1/evidence/:id` | JWT | Get evidence detail |
+| `GET` | `/api/v1/evidence` | JWT | Recent evidence (last 50) |
+| `GET` | `/api/v1/evidence/:id` | JWT | Evidence detail |
 
 ---
 
@@ -147,14 +186,9 @@ terraform init
 terraform apply -var="project_id=your-gcp-project"
 ```
 
-Deploys: Cloud Run (API), Cloud SQL (PostgreSQL), Artifact Registry, Secret Manager.
+Deploys: Cloud Run (API), Cloud SQL (PostgreSQL 16), Artifact Registry, Secret Manager.
 
-CI/CD via GitHub Actions on push to `main`. Includes:
-- Go lint + test + build
-- Next.js lint + build + type check
-- Trivy vulnerability scan (CRITICAL/HIGH)
-- Gitleaks secret scanning
-- Deploy to Cloud Run
+CI/CD via GitHub Actions triggers on `main` push: Go lint → test → build, Next.js lint → build → type check, Trivy vulnerability scan, Gitleaks secret scan, deploy to Cloud Run.
 
 ---
 
@@ -162,12 +196,12 @@ CI/CD via GitHub Actions on push to `main`. Includes:
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 15, TypeScript, Tailwind CSS, shadcn/ui |
-| Backend API | Go 1.23, Chi Router, JWT (golang-jwt) |
+| Frontend | Next.js 15, TypeScript, Tailwind CSS |
+| Backend | Go 1.23, Chi Router, JWT |
 | Database | PostgreSQL 16 |
 | Cache | Redis 7 |
 | Reporter | Python 3.11, Jinja2, WeasyPrint |
-| Infra | Terraform, GCP (Cloud Run, Cloud SQL, Artifact Registry) |
+| Infra | Terraform, GCP Cloud Run + Cloud SQL |
 | CI/CD | GitHub Actions, Trivy, Gitleaks |
 | Containers | Docker, Docker Compose |
 
@@ -175,33 +209,33 @@ CI/CD via GitHub Actions on push to `main`. Includes:
 
 ## 🔐 Security
 
-- **JWT Authentication** with refresh tokens (HS256)
-- **RBAC** — admin, member, auditor roles
-- **bcrypt** password hashing
-- **CORS** restricted to frontend origin
-- **Request ID** tracing on all API calls
-- **SAST + Secret Scanning** in CI/CD pipeline
-- **Trivy** vulnerability scanning on every PR
+- JWT authentication with refresh tokens (HS256)
+- RBAC: admin, member, auditor roles
+- bcrypt password hashing (cost 10)
+- CORS restricted to frontend origin
+- Request ID tracing on all API calls
+- SAST + Secret Scanning in CI/CD
+- Trivy vulnerability scanning (CRITICAL/HIGH)
 
 ---
 
-## 📊 Supported Compliance Frameworks
+## 📊 Compliance Frameworks
 
 | Framework | Controls | Scope |
 |-----------|----------|-------|
-| **NIS2** | 8+ | EU Network & Information Security |
-| **DORA** | 5+ | Digital Operational Resilience Act |
-| **ISO 27001** | 5+ | Information Security Management |
-| **ENS** | 3+ | Esquema Nacional de Seguridad (España) |
+| NIS2 | 8 | EU Network & Information Security Directive |
+| DORA | 5 | Digital Operational Resilience Act (financial) |
+| ISO 27001 | 5 | Information Security Management System |
+| ENS | 3 | Esquema Nacional de Seguridad (Spain) |
 
 ---
 
 ## 👤 Author
 
-**Santiago Durán Ruiz**
+**Santiago Durán Ruiz** — Full-stack software engineer specialized in cybersecurity, cloud infrastructure, and compliance automation.
 
 - GitHub: [@duranruizsantiago-lang](https://github.com/duranruizsantiago-lang)
-- Portfolio: Full-stack software engineer specialized in cybersecurity, cloud infrastructure, and compliance automation.
+- More projects: [github.com/duranruizsantiago-lang?tab=repositories](https://github.com/duranruizsantiago-lang?tab=repositories)
 
 ---
 
